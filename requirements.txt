@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pytesseract
+pillow
+python-multipart
+transformers
+torch
+numpy
+openai
+requests
+pandas
