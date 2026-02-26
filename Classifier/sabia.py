@@ -24,10 +24,12 @@ def classify_sabia(text: str):
         timeout=30
     )
 
-    raw = r.json()["response"]
+    raw_response = r.json()["response"]
 
+    clean_json = raw_response.replace("```json", "").replace("```", "").strip()
+    
     # Validação via Pydantic
-    parsed = LLMClassification.model_validate_json(raw)
+    parsed = LLMClassification.model_validate_json(clean_json)
 
     return {
         "model": "sabia",
