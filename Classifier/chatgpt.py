@@ -1,30 +1,28 @@
-# classifiers/chatgpt.py
-
-import json
-from datetime import datetime
 from openai import OpenAI
-from config import CHATGPT_API_KEY, CHATGPT_MODEL, TEMPERATURE
-from debate.prompts import SYSTEM_CLASSIFY
+from datetime import datetime
+from config import CHATGPT_API_KEY, CHATGPT_MODEL
+from schemas import LLMClassification
+from debate.prompts import SYSTEM_PROMPT
 
 client = OpenAI(api_key=CHATGPT_API_KEY)
 
 def classify_chatgpt(text: str):
 
-    response = client.chat.completions.create(
+    response = client.responses.parse(
         model=CHATGPT_MODEL,
-        temperature=TEMPERATURE,
-        messages=[
-            {"role": "system", "content": SYSTEM_CLASSIFY},
+        input=[
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": text}
-        ]
+        ],
+        response_format=LLMClassification
     )
 
-    raw = response.choices[0].message.content
-    parsed = json.loads(raw)
+    parsed: LLMClassification = response.output_parsed
 
     return {
         "model": "chatgpt",
-        **parsed,
-        "raw_response": raw,
+        "justification": parsed.justification,
+        "prediction": parsed.prediction,
+        "label_name": parsed.label_name,
         "timestamp": datetime.utcnow().isoformat()
     }

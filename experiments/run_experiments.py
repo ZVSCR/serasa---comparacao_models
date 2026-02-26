@@ -1,5 +1,3 @@
-# experiments/run_experiment.py
-
 from orchestrator.evaluator import evaluate_news
 from utils.logger import log_result
 

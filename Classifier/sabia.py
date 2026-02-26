@@ -1,16 +1,15 @@
-# classifiers/sabia.py
-
 import requests
 import json
+import re
 from datetime import datetime
-from config import SABIA_API_KEY, SABIA_ENDPOINT, TEMPERATURE
-from debate.prompts import SYSTEM_CLASSIFY
+from config import SABIA_API_KEY, SABIA_ENDPOINT
+from debate.prompts import SYSTEM_PROMPT
+from schemas import LLMClassification
 
 def classify_sabia(text: str):
 
     payload = {
-        "prompt": SYSTEM_CLASSIFY + "\n\n" + text,
-        "temperature": TEMPERATURE
+        "prompt": SYSTEM_PROMPT + "\n\n" + text
     }
 
     headers = {
@@ -18,14 +17,22 @@ def classify_sabia(text: str):
         "Content-Type": "application/json"
     }
 
-    r = requests.post(SABIA_ENDPOINT, json=payload, headers=headers)
+    r = requests.post(
+        SABIA_ENDPOINT,
+        json=payload,
+        headers=headers,
+        timeout=30
+    )
 
     raw = r.json()["response"]
-    parsed = json.loads(raw)
+
+    # Validação via Pydantic
+    parsed = LLMClassification.model_validate_json(raw)
 
     return {
         "model": "sabia",
-        **parsed,
-        "raw_response": raw,
+        "justification": parsed.justification,
+        "prediction": parsed.prediction,
+        "label_name": parsed.label_name,
         "timestamp": datetime.utcnow().isoformat()
     }

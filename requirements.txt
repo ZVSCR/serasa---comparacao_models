@@ -9,3 +9,4 @@ numpy
 openai
 requests
 pandas
+pydantic
